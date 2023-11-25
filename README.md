@@ -80,7 +80,7 @@ read.cgiでニコニコ動画の動画URLを動画の埋め込みに変換します。
 忍法帖もどきを追加します。名前欄に!ninjaで自分のステータスを確認できます。
 
 ## 0ch_normalNML.pl
-太字や斜体、取り消し線、下線などの基本的なN<small>channel</small> M<small>arkup</small> L<small>anguage</small>を追加します。
+太字や斜体、取り消し線、下線などの基本的なN<small>channel</small>M<small>arkup</small>L<small>anguage</small>を追加します。
 
 ## 0ch_ownercmd.pl
 スレッドを建てた人のみ使用できるコマンドを実装するプラグインです。 >>1と同じホスト名(または端末識別子)ならコマンドを実行できます。 また、スレ建て時にメール欄に「!owner:パスワード:」と入力すると、ホスト名が変わった場合でもメール欄に「!owner:パスワード:!stop」のように入力することでコマンドを実行できます。 ※パスワードの後ろにもコロン「:」があります。  
