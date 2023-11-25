@@ -128,6 +128,21 @@ sub execute
 		# スレ主ならコマンド処理
 		if ($isowner) {
 			
+			# 本文を取得
+			my $MESSAGE = $Form->Get('MESSAGE');
+			# 本文から主の色を取得
+			if ($MESSAGE =~ s/!nusicolor:(.+?):/!nusicolor:$1: <br> <span style="color:red"><small>主の色: $1<\/small><\/span>/g) {
+				# 本文を再設定
+				$Form->Set('MESSAGE', $MESSAGE);
+				# 主の色を記録
+				$Threads->SetAttr($threadid, 'nusi_color', $1);
+			}
+
+			my $nusi_color = $Threads->GetAttr($threadid, 'nusi_color');
+			if ($nusi_color eq ""){
+				$nusi_color = "red";
+			}
+
 			# メール欄を取得
 			my $mail = $Form->Get('mail');
 			# ID取得
@@ -138,7 +153,7 @@ sub execute
 				$Form->Set('mail', $mail);
 			}else{
 				# ID部分を再設定
-				$Form->Set('idpart', "$id<font color=\"red\"><small>主</small></font>");
+				$Form->Set('idpart', "$id<font color=\"$nusi_color\"><small>主</small></font>");
 			}
 			
 		}

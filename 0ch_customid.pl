@@ -1,10 +1,10 @@
 #============================================================================================================
 #
-#	拡張機能 - AA表示タグ
-#	0ch_aa.pl
+#	拡張機能 - カスタムID / ID無し
+#	0ch_customid.pl
 #
 #============================================================================================================
-package ZPL_aa;
+package ZPL_customid;
 
 
 
@@ -13,7 +13,7 @@ package ZPL_aa;
 #------------------------------------------------------------------------------------------------------------
 sub getName
 {
-	return 'AA表示タグ';
+	return 'カスタムID / ID無し';
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ sub getName
 #------------------------------------------------------------------------------------------------------------
 sub getExplanation
 {
-	return 'AAをきれいに表示できるタグを追加するプラグインです。';
+	return 'カスタムID / ID無し';
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ sub getExplanation
 #------------------------------------------------------------------------------------------------------------
 sub getType
 {
-	return (1|2);
+	return (1|2|16);
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -53,11 +53,111 @@ sub execute
 	
 	my $CGI = $Sys->Get('MainCGI');
 
-	my $MESSAGE = $Form->Get('MESSAGE');
-	$MESSAGE =~ s/&lt;aa&gt;(.+?)&lt;\/aa&gt;/<pre style="font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;">$1<\/pre>/g;
-	$MESSAGE =~ s/\$\[aa\|(.+?)\]/<pre style="font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;">$1<\/pre>/g;
-	$Form->Set('MESSAGE', $MESSAGE);
+	if ($type == 1 || $type == 2) {
+		my $Threads = $CGI->{'THREADS'} || $Sys->Get('_THREAD_');
+		my $threadid = $Sys->Get('KEY');
 
+		# ユーザー識別IDを取得 (表示されるIDとは別)
+		my $clientid = $Sys->Get('KOYUU');
+		
+		# スレ主かどうか
+		my $isowner = 0;
+
+		# スレ主の識別IDを取得
+		my $owner = $Threads->GetAttr($threadid, 'owner');
+		# 記録されたパスワードを取得
+		my $pass = $Threads->GetAttr($threadid, 'ownerpass');
+		# メール欄を取得
+		my $mail = $Form->Get('mail');
+		# ユーザーがスレ主と同じ識別IDなら
+		if ($clientid eq $owner) {
+			$isowner = 1;
+			
+		# そうでなければパスワードによる判定
+		} elsif ($mail =~ s/!owner:([^:]+)://g) {
+			# メール欄を再設定
+			$Form->Set('mail', $mail);
+			# パスワードを照合
+			if ($pass ne '' && $pass eq $1) {
+				$isowner = 1;
+			}
+		}
+	}
+
+	# bbs.cgi (書き込み時)
+	if ($type == 1) {
+		my $bbs = $Sys->Get('BBS');
+		my $threadid = $Sys->Get('KEY');
+		
+		# スレッド管理モジュールを準備
+		my $Threads = $CGI->{'THREADS'} || $Sys->Get('_THREAD_');
+		
+		# スレッドの属性情報を読み込む
+		$Threads->LoadAttr($Sys);
+		
+		# メッセージ欄にコマンドがあれば処理
+		my $MESSAGE = $Form->Get('MESSAGE');
+		if ($MESSAGE =~ s/!customid/!customid <br> <span style="color:red"><small>カスタムID<\/small><\/span>/g) {	
+			# 本文を再設定
+			$Form->Set('MESSAGE', $MESSAGE);
+			# 属性を設定・保存
+			$Threads->SetAttr($threadid, 'id', "custom");
+			$Threads->SaveAttr($Sys);
+		}
+
+		my $MESSAGE = $Form->Get('MESSAGE');
+		if ($MESSAGE =~ s/!noid/!noid <br> <span style="color:red"><small>ID無し<\/small><\/span>/g) {	
+			# 本文を再設定
+			$Form->Set('MESSAGE', $MESSAGE);
+			# 属性を設定・保存
+			$Threads->SetAttr($threadid, 'id', "no");
+			$Threads->SaveAttr($Sys);
+		}
+	
+	}elsif ($type == 2 && $isowner == 1){
+		my $bbs = $Sys->Get('BBS');
+		my $threadid = $Sys->Get('KEY');
+		
+		# スレッド管理モジュールを準備
+		my $Threads = $CGI->{'THREADS'} || $Sys->Get('_THREAD_');
+		
+		# スレッドの属性情報を読み込む
+		$Threads->LoadAttr($Sys);
+		
+		# メッセージ欄にコマンドがあれば処理
+		my $MESSAGE = $Form->Get('MESSAGE');
+		if ($MESSAGE =~ s/!customid/!customid <br> <span style="color:red"><small>カスタムID<\/small><\/span>/g) {	
+			# 本文を再設定
+			$Form->Set('MESSAGE', $MESSAGE);
+			# 属性を設定・保存
+			$Threads->SetAttr($threadid, 'id', "custom");
+			$Threads->SaveAttr($Sys);
+		}
+
+		my $MESSAGE = $Form->Get('MESSAGE');
+		if ($MESSAGE =~ s/!noid/!noid <br> <span style="color:red"><small>ID無し<\/small><\/span>/g) {	
+			# 本文を再設定
+			$Form->Set('MESSAGE', $MESSAGE);
+			# 属性を設定・保存
+			$Threads->SetAttr($threadid, 'id', "no");
+			$Threads->SaveAttr($Sys);
+		}
+	}
+	
+	# read.cgi
+	if ($type == 16) {
+		my $id = $Sys->Get("idpart");
+		my $setting = $Threads->GetAttr($threadid, 'id');
+		if ($setting eq "custom") {
+			my $Conv = $Sys->Get('MainCGI')->{'CONV'};
+			$id = $Conv->MakeID($Sys->Get('SERVER'), $Sys->Get('CLIENT'), $Sys->Get('KOYUU'), $Sys->Get('BBS')."_-_".$Sys->Get('KEY'), 8);
+		}elsif ($setting eq "no") {
+			$id = "";
+		}
+
+		$Sys->Set("idpart",$id);
+	}
+	
 	return 0;
 }
 

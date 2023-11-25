@@ -98,8 +98,8 @@ sub execute
 	if ($type == 1) {
 		# キャップ または >>1 なら設定可
 		if ($admin || $tate) {
-			if ($MESSAGE =~ s/!774(.*)!3?$//g) {
-				# $Form->Set('MESSAGE', $MESSAGE);
+			if ($MESSAGE =~ s/!774(.+?)!3?$/!774$1!3 <br> <span style="color:red"><small>名無し名: $1<\/small><\/span>/g) {
+				$Form->Set('MESSAGE', $MESSAGE);
 				$Threads->SetAttr($threadid, '774', "!$1");
 			}
 			$Threads->SaveAttr($Sys);
@@ -107,8 +107,8 @@ sub execute
 	}elsif ($type == 2 && $isowner == 1){
 		# キャップ または >>1 なら設定可
 		if ($admin || $tate) {
-			if ($MESSAGE =~ s/!774(.*)!3?$//g) {
-				# $Form->Set('MESSAGE', $MESSAGE);
+			if ($MESSAGE =~ s/!774(.+?)!3?$/!774$1!3 <br> <span style="color:red"><small>名無し名: $1<\/small><\/span>/g) {
+				$Form->Set('MESSAGE', $MESSAGE);
 				$Threads->SetAttr($threadid, '774', "!$1");
 			}
 			$Threads->SaveAttr($Sys);

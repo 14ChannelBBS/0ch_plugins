@@ -1,10 +1,10 @@
 #============================================================================================================
 #
-#	拡張機能 - AA表示タグ
-#	0ch_aa.pl
+#	拡張機能 - 標準N(channel)M(arkup)L(anguage)
+#	0ch_template3.pl
 #
 #============================================================================================================
-package ZPL_aa;
+package ZPL_normalNML;
 
 
 
@@ -13,7 +13,7 @@ package ZPL_aa;
 #------------------------------------------------------------------------------------------------------------
 sub getName
 {
-	return 'AA表示タグ';
+	return '標準N<small>channel</small>M<small>arkup</small>L<small>anguage</small>';
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ sub getName
 #------------------------------------------------------------------------------------------------------------
 sub getExplanation
 {
-	return 'AAをきれいに表示できるタグを追加するプラグインです。';
+	return '太字やイタリック、下線、取り消し線などの標準N<small>channel</small>M<small>arkup</small>L<small>anguage</small>を実装します。';
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -51,14 +51,33 @@ sub execute
 	# 0ch本家では実行しない
 	return 0 if (!$this->{'is0ch+'});
 	
-	my $CGI = $Sys->Get('MainCGI');
-
-	my $MESSAGE = $Form->Get('MESSAGE');
-	$MESSAGE =~ s/&lt;aa&gt;(.+?)&lt;\/aa&gt;/<pre style="font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;">$1<\/pre>/g;
-	$MESSAGE =~ s/\$\[aa\|(.+?)\]/<pre style="font-size: 16px; line-height: 18px; font-family: Mona,IPAMonaPGothic,'IPA モナー Pゴシック','MS PGothic AA','MS PGothic','ＭＳ Ｐゴシック',sans-serif;">$1<\/pre>/g;
-	$Form->Set('MESSAGE', $MESSAGE);
-
+	$MESSAGE =~ s/\$\[bold\|(.+?)\]/<b>$1<\/b>/g;
+	$MESSAGE =~ s/\$\[italic\|(.+?)\]/<i>$1<\/i>/g;
+	$MESSAGE =~ s/\$\[underline\|(.+?)\]/<u>$1<\/u>/g;
+	$MESSAGE =~ s/\$\[deleteline\|(.+?)\]/<s>$1<\/s>/g;
+	
 	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#	なんちゃってbbs.cgiエラーページ表示
+#------------------------------------------------------------------------------------------------------------
+sub PrintBBSError
+{
+	my ($Sys, $err) = @_;
+	
+	require './module/orald.pl';
+	
+	my $CGI = $Sys->Get('MainCGI');
+	my $Page = $CGI->{'PAGE'};
+	
+	my $Error = ORALD->new;
+	$Error->Load($Sys);
+	$Error->Print($CGI, $Page, $err, $Sys->Get('AGENT'));
+	
+	$Page->Flush('', 0, 0);
+	
+	exit($err);
 }
 
 

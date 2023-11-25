@@ -95,11 +95,15 @@ sub execute
 
 	# キャップ または >>1 なら設定可
 	if ($admin || $isowner || $tate) {
-		if ($MESSAGE =~ s/!force774$//g) {
+		if ($MESSAGE =~ s/!force774$/!force774 <br> <span style="color:red"><small>名無し強制<\/small><\/span>/g) {
+			# 本文を再設定
+			$Form->Set('MESSAGE', $MESSAGE);
 			$Threads->SetAttr($threadid, 'force774', "on");
 		}
 
-		if ($MESSAGE =~ s/!forcekote$//g) {
+		if ($MESSAGE =~ s/!forcekote$/!forcekote <br> <span style="color:red"><small>コテハン強制<\/small><\/span>/g) {
+			# 本文を再設定
+			$Form->Set('MESSAGE', $MESSAGE);
 			$Threads->SetAttr($threadid, 'forcekote', "on");
 		}
 		$Threads->SaveAttr($Sys);
