@@ -34,6 +34,7 @@ AAをきれいに表示することができるHTMLタグ (&lt;aa&gt;～&lt;/aa&gt;)を追加します。
 このプラグインをread.cgiに対応させるために、read.cgiの改造が必要です。sub Initializeの最後、153行目(`return $ZP::E_SUCCESS;`の前)に以下のコードを加えてください。
 ```perl
 
+
 	# 拡張機能ロード
 	require './module/athelas.pl';
 	my $Plugin = ATHELAS->new;
